@@ -1,0 +1,66 @@
+{
+  "name": "@deepseek-ai/dsh-rlm",
+  "description": "Paper-aligned Recursive Language Model plugin for DeepSeek Harness: persistent REPL kernel, externalized context, programmatic llm_query and depth-limited rlm_query",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "lib/index.js",
+  "types": "lib/types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/types/index.d.ts",
+      "default": "./lib/index.js"
+    },
+    "./context-local": {
+      "types": "./lib/types/plugins/context-local.d.ts",
+      "default": "./lib/plugins/context-local.js"
+    },
+    "./kernel-python": {
+      "types": "./lib/types/plugins/kernel-python.d.ts",
+      "default": "./lib/plugins/kernel-python.js"
+    },
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./package.json": "./package.json",
+    "./testing": {
+      "types": "./lib/types/testing.d.ts",
+      "default": "./lib/testing.js"
+    }
+  },
+  "files": [
+    "lib/index.js",
+    "lib/**/*.js",
+    "lib/types/**/*.d.ts",
+    "cordis.patch.yml"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": "^22.19.0 || >=24.0.0"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "typecheck": "node scripts/build.mjs --noEmit",
+    "test": "node --test",
+    "test:python": "python3 -m unittest discover -s src/kernel/python -p 'test_*.py'",
+    "demo": "node scripts/demo.mjs",
+    "link-dev-deps": "node scripts/link-dev-deps.mjs",
+    "verify": "node scripts/build.mjs && node --test && python3 -m unittest discover -s src/kernel/python -p 'test_*.py'"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "0.2.0-rc.2",
+    "@deepseek-ai/dsh-agent": "0.2.0-rc.2",
+    "@deepseek-ai/dsh-llm": "0.2.0-rc.2",
+    "@deepseek-ai/dsh-session": "0.2.0-rc.2",
+    "@deepseek-ai/dsh-session-projection": "0.2.0-rc.2",
+    "@deepseek-ai/dsh-system-prompt": "0.2.0-rc.2",
+    "@deepseek-ai/dsh-tools": "0.2.0-rc.2"
+  },
+  "dependencies": {
+    "@deepseek-ai/schemastery": "0.2.0-rc.2",
+    "zod": "4.1.11"
+  }
+}

@@ -1,0 +1,74 @@
+# Bundle patch for @deepseek-ai/dsh-rlm.
+#
+# Every row is disabled-by-default for a profile that does not opt in: the RLM
+# plugin is absent from the default composition on purpose (README §5), and the
+# two capability providers must be listed before the core plugin so the core's
+# `inject` is satisfied at load time.
+#
+# Add this file to a profile with:
+#   package.json → { "dependencies": { "dsh-rlm": "link:/path/to/dsh-rlm" },
+#                    "dsh": { "profile": { "bundles": ["@deepseek-ai/dsh-base", "dsh-rlm"] } } }
+#
+# The flags below are host ceilings, never prompt instructions. Raising them is a
+# cost decision, not a capability decision.
+
+- id: rlm-context-local
+  name: '@deepseek-ai/dsh-rlm/context-local'
+  config:
+    # Artifacts, metadata and per-invocation traces live here.
+    root: '.dsh/rlm-artifacts'
+    charIndexStep: 65536
+    maxRangeChars: 16000000
+    maxRecordBytes: 8388608
+    # Set true only together with a deployment-supplied cipher.
+    requireEncryption: false
+    maxScanBytes: 16777216
+
+- id: rlm-kernel-python
+  name: '@deepseek-ai/dsh-rlm/kernel-python'
+  config:
+    pythonPath: python3
+    guestNetworkGuard: true
+    maxFrameBytes: 67108864
+    killGraceMs: 2000
+    # Production hardening: wrap the interpreter in a real sandbox. The provider
+    # declares `network: 'disabled'` ONLY when isolationCommandDisablesNetwork is
+    # true, and the core fails closed when a policy asks for more than the
+    # provider can prove.
+    # isolationCommand: ['bwrap', '--unshare-net', '--ro-bind', '/', '/', '--tmpfs', '/tmp', '--die-with-parent', '--']
+    # isolationCommandDisablesNetwork: true
+
+- id: rlm
+  name: '@deepseek-ai/dsh-rlm'
+  config:
+    toolName: run_rlm
+    defaultDepth: 1
+    maxDepth: 3
+    # Routes are explicit: an unset route fails the call rather than silently
+    # falling back to a different model (README §4.8).
+    rootProvider: apifusion
+    rootModel: deepseek-v4-pro
+    leafProvider: apifusion
+    leafModel: deepseek-v4.1-flash
+    promptProfileId: paper-gpt5
+    requireQualifiedProfile: false
+    maxConcurrentQueries: 16
+    maxTotalQueries: 4096
+    maxConcurrentKernels: 8
+    maxTotalKernels: 8
+    maxPromptChars: 100000000
+    maxQueryPromptChars: 2000000
+    maxWallClockMs: 900000
+    maxRootIterations: 64
+    maxInlineOutputBytes: 1048576
+    maxArtifactBytes: 1073741824
+    maxContextReadBytes: 536870912
+    maxInputTokens: 8000000
+    maxOutputTokens: 1000000
+    maxCostUsd: 25
+    maxRootHistoryChars: 400000
+    writeSessionEvents: true
+    contextStoreRoot: '.dsh/rlm-artifacts'
+    # Optional, so cost accounting is a measurement rather than a guess.
+    # pricing:
+    #   apifusion/deepseek-v4-pro: { inputUsdPerMTok: 0, outputUsdPerMTok: 0 }

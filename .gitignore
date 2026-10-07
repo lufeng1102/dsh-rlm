@@ -1,0 +1,9 @@
+# Build output (regenerate with `node scripts/build.mjs`)
+lib/
+# Development symlinks to the local dsh installation (scripts/link-dev-deps.mjs)
+node_modules/
+# Python bytecode from the driver unit tests
+__pycache__/
+*.pyc
+# Local RLM artifacts produced by demo runs without --keep
+.dsh/
